@@ -28,7 +28,6 @@ class KaKaoOAuthController(
     private val redirectUri: String,
 
     private val userService: UserService,
-    service: UserService
 ) {
 
     @GetMapping("/login")
@@ -43,9 +42,6 @@ class KaKaoOAuthController(
     fun getKaKaoToken(@RequestParam(name = "code") accessToken: String): ResponseEntity<String> {
         val url = "$authUrl/token"
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
-
         val params = mapOf(
             "client_id" to clientId,
             "redirect_uri" to redirectUri,
@@ -53,7 +49,6 @@ class KaKaoOAuthController(
             "code" to accessToken
         )
 
-        val request = HttpEntity(params, headers)
         val kaKaoToken = RestTemplate().postForObject(
             url,
             LinkedMultiValueMap<String, String>().apply { setAll(params) },
