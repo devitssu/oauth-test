@@ -77,7 +77,7 @@ class KaKaoOAuthController(
         )
 
         val kakaoUser = kakaoUserResponse.body
-        val providerId = kakaoUser?.id ?: throw IllegalStateException("User not found")
+        val providerId = kakaoUser?.id ?: throw IllegalStateException("Kakao User ID is missing")
 
         val foundUser = userService.findByProviderId(providerId)
 
