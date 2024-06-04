@@ -1,16 +1,14 @@
-package com.teamsparta.oauthtest
+package com.teamsparta.oauthtest.oauth
 
+import com.teamsparta.oauthtest.oauth.dto.KaKaoToken
+import com.teamsparta.oauthtest.oauth.dto.KakaoUserResponse
+import com.teamsparta.oauthtest.user.UserService
+import com.teamsparta.oauthtest.user.dto.UserResponse
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.stereotype.Controller
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 
 
@@ -28,6 +26,9 @@ class KaKaoOAuthController(
 
     @Value("\${oauth2.kakao.redirect-uri}")
     private val redirectUri: String,
+
+    private val userService: UserService,
+    service: UserService
 ) {
 
     @GetMapping("/login")
@@ -62,5 +63,33 @@ class KaKaoOAuthController(
         return ResponseEntity
             .ok()
             .body(kaKaoToken?.accessToken)
+    }
+
+    @GetMapping("/user")
+    @ResponseBody
+    fun getUser(@RequestHeader requestHeader: HttpHeaders): ResponseEntity<UserResponse> {
+        val accessToken = requestHeader.getOrEmpty("Authorization")[0]?.replace("Bearer ", "")?.trim() ?: ""
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        headers["Authorization"] = "Bearer $accessToken"
+
+        val kakaoUserResponse = RestTemplate().exchange(
+            apiUrl,
+            HttpMethod.GET,
+            HttpEntity<String>(headers),
+            KakaoUserResponse::class.java
+        )
+
+        val kakaoUser = kakaoUserResponse.body
+        val providerId = kakaoUser?.id ?: throw IllegalStateException("User not found")
+
+        val foundUser = userService.findByProviderId(providerId)
+
+        return if (foundUser != null) {
+            ResponseEntity.status(HttpStatus.OK).body(foundUser)
+        } else {
+            ResponseEntity.status(HttpStatus.CREATED).body(userService.signUp(kakaoUser))
+        }
     }
 }

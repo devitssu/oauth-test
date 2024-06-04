@@ -1,8 +1,8 @@
-package com.teamsparta.oauthtest
+package com.teamsparta.oauthtest.oauth.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class KaKaoToken (
+data class KaKaoToken(
     @JsonProperty("access_token")
     val accessToken: String,
 
