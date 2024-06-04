@@ -2,6 +2,7 @@ spring.application.name: oauth-test
 
 oauth2:
   kakao:
-    url: "https://kauth.kakao.com/oauth"
+    auth-url: "https://kauth.kakao.com/oauth"
+    api-url: "https://kapi.kakao.com/v2/user/me"
     client-id: "f4537583c8f80f6c58112f43b15f7bd9"
     redirect-uri: "http://localhost:8080/oauth2/kakao/redirect"

@@ -17,8 +17,11 @@ import org.springframework.web.client.RestTemplate
 @RequestMapping("/oauth2/kakao")
 @Controller
 class KaKaoOAuthController(
-    @Value("\${oauth2.kakao.url}")
-    private val url: String,
+    @Value("\${oauth2.kakao.auth-url}")
+    private val authUrl: String,
+
+    @Value("\${oauth2.kakao.api-url}")
+    private val apiUrl: String,
 
     @Value("\${oauth2.kakao.client-id}")
     private val clientId: String,
@@ -30,14 +33,14 @@ class KaKaoOAuthController(
     @GetMapping("/login")
     fun requestKakaoToken(): String {
         val requestUrl =
-            "${url}/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&redirect_uri=${redirectUri}&response_type=code"
+            "${authUrl}/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&redirect_uri=${redirectUri}&response_type=code"
         return "redirect:$requestUrl"
     }
 
     @GetMapping("/redirect")
     @ResponseBody
     fun getKaKaoToken(@RequestParam(name = "code") accessToken: String): ResponseEntity<String> {
-        val url = "$url/token"
+        val url = "$authUrl/token"
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
