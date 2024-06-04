@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service
 class UserService(
     private val userRepository: UserRepository
 ) {
-    fun signUp(user: KakaoUserResponse): UserResponse {
-        return userRepository.save(User(providerId = user.id, nickname = user.profile.nickname)).toResponse()
+    fun signUp(kakaoUser: KakaoUserResponse): UserResponse {
+        return userRepository.save(User(providerId = kakaoUser.id, nickname = kakaoUser.nickname)).toResponse()
     }
 
     fun findByProviderId(providerId: Long): UserResponse? {

@@ -70,16 +70,17 @@ class KaKaoOAuthController(
         headers["Authorization"] = "Bearer $accessToken"
 
         val kakaoUserResponse = RestTemplate().exchange(
-            apiUrl,
+            "${apiUrl}?property_keys=[\"kakao_account.profile\"]",
             HttpMethod.GET,
             HttpEntity<String>(headers),
-            KakaoUserResponse::class.java
+            String::class.java
         )
 
-        val kakaoUser = kakaoUserResponse.body
-        val providerId = kakaoUser?.id ?: throw IllegalStateException("Kakao User ID is missing")
+        val kakaoUser = KakaoUserResponse.from(
+            kakaoUserResponse.body ?: throw IllegalStateException("Bad response")
+        )
 
-        val foundUser = userService.findByProviderId(providerId)
+        val foundUser = userService.findByProviderId(kakaoUser.id)
 
         return if (foundUser != null) {
             ResponseEntity.status(HttpStatus.OK).body(foundUser)
